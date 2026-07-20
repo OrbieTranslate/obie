@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Orbi — นักแปลภาษา</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #F8F7FC;
+    --card: #FFFFFF;
+    --ink: #241F35;
+    --ink-soft: #736C8C;
+    --line: #ECE9F5;
+    --violet: #7B5CFA;
+    --violet-deep: #5A2FE0;
+    --magenta: #F14FB4;
+    --blue: #4CC9F0;
+    --grad: linear-gradient(135deg, var(--violet) 0%, #A75CF7 45%, var(--magenta) 100%);
+    --grad-soft: linear-gradient(135deg, rgba(123,92,250,0.10), rgba(241,79,180,0.10));
+    --shadow: 0 20px 45px -18px rgba(90,47,224,0.28);
+    --radius-lg: 28px;
+    --radius-md: 20px;
+    --radius-sm: 14px;
+  }
+
+  *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+
+  html,body{
+    margin:0; padding:0; height:100%;
+    background:
+      radial-gradient(600px 400px at 85% -5%, rgba(241,79,180,0.10), transparent 60%),
+      radial-gradient(600px 500px at -10% 10%, rgba(123,92,250,0.12), transparent 55%),
+      var(--bg);
+    font-family:'Sarabun', sans-serif;
+    color: var(--ink);
+  }
+
+  h1,h2,h3, .display{ font-family:'Prompt', sans-serif; }
+
+  .app{
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    display:flex;
+    flex-direction:column;
+    padding: 22px 18px 28px;
+  }
+
+  /* ---------- Header ---------- */
+  .header{
+    display:flex; align-items:center; gap:12px;
+    margin-bottom: 20px;
+  }
+  .logo{
+    width:40px; height:40px; border-radius:50%;
+    background: var(--grad);
+    box-shadow: 0 8px 18px -6px rgba(123,92,250,0.55);
+    position:relative; flex:none;
+  }
+  .logo::after{
+    content:""; position:absolute; inset:9px;
+    border-radius:50%;
+    background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.9), rgba(255,255,255,0) 60%);
+  }
+  .header .title{ font-weight:700; font-size:19px; letter-spacing:.2px; }
+  .header .subtitle{ font-size:12.5px; color:var(--ink-soft); margin-top:1px; }
+
+  /* ---------- Language bar ---------- */
+  .langbar{
+    display:flex; align-items:center; gap:8px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 6px;
+    box-shadow: 0 10px 30px -20px rgba(36,31,53,0.25);
+  }
+  .lang-select-wrap{ flex:1; position:relative; }
+  .lang-select{
+    width:100%; appearance:none; -webkit-appearance:none;
+    background: transparent;
+    border:none;
+    font-family:'Prompt', sans-serif;
+    font-weight:600; font-size:14.5px;
+    color: var(--ink);
+    padding: 11px 30px 11px 16px;
+    border-radius: 999px;
+    cursor:pointer;
+  }
+  .lang-select:focus{ outline: 2px solid var(--violet); outline-offset: -2px; }
+  .lang-select-wrap::after{
+    content:"";
+    position:absolute; right:12px; top:50%; translate: 0 -60%;
+    width:7px; height:7px;
+    border-right:2px solid var(--ink-soft);
+    border-bottom:2px solid var(--ink-soft);
+    transform: rotate(45deg);
+    pointer-events:none;
+  }
+  .swap-btn{
+    flex:none; width:38px; height:38px; border-radius:50%;
+    border:none; background: var(--grad); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition: transform .25s ease;
+    box-shadow: 0 8px 16px -8px rgba(123,92,250,0.7);
+  }
+  .swap-btn:active{ transform: scale(0.88) rotate(180deg); }
+  .swap-btn svg{ width:17px; height:17px; }
+
+  /* ---------- Tabs ---------- */
+  .tabs{
+    display:flex; gap:6px; margin: 18px 0 16px;
+    background: #F0EDFA; border-radius: 999px; padding: 4px;
+  }
+  .tab{
+    flex:1; border:none; background:transparent; cursor:pointer;
+    padding: 10px 8px; border-radius: 999px;
+    font-family:'Prompt', sans-serif; font-weight:600; font-size:13.5px;
+    color: var(--ink-soft);
+    transition: all .25s ease;
+    display:flex; align-items:center; justify-content:center; gap:6px;
+  }
+  .tab.active{
+    background: var(--card); color: var(--violet-deep);
+    box-shadow: 0 6px 16px -8px rgba(90,47,224,0.35);
+  }
+  .tab svg{ width:16px; height:16px; }
+
+  .panel{ display:none; flex-direction:column; gap:14px; flex:1; }
+  .panel.active{ display:flex; }
+
+  /* ---------- Text panel ---------- */
+  .card{
+    background: var(--card);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+    padding: 18px;
+  }
+  .field-label{
+    font-size:12px; font-weight:600; color: var(--ink-soft);
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:8px;
+  }
+  textarea{
+    width:100%; border:none; resize:none;
+    font-family:'Sarabun', sans-serif; font-size:16.5px; line-height:1.55;
+    color: var(--ink); background:transparent;
+    min-height: 92px; outline:none;
+  }
+  .input-tools{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line);
+  }
+  .char-count{ font-size:11.5px; color:#B4AECB; }
+  .icon-btn{
+    width:36px; height:36px; border-radius:50%;
+    border:none; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    background:#F5F3FB; color: var(--violet-deep);
+    transition: all .2s ease;
+  }
+  .icon-btn:hover{ background:#EAE5FB; }
+  .icon-btn svg{ width:17px; height:17px; }
+  .icon-btn.mic.recording{
+    background: var(--grad); color:#fff;
+    animation: micPulse 1.1s ease-in-out infinite;
+  }
+  @keyframes micPulse{
+    0%,100%{ box-shadow: 0 0 0 0 rgba(241,79,180,0.45); }
+    50%{ box-shadow: 0 0 0 9px rgba(241,79,180,0); }
+  }
+  .tool-group{ display:flex; gap:8px; }
+
+  .divider-arrow{
+    display:flex; align-items:center; justify-content:center;
+    margin: -4px 0;
+  }
+  .divider-arrow svg{ width:20px; height:20px; color:#C9C2E6; }
+
+  .output-card{
+    background: var(--grad-soft);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(123,92,250,0.16);
+    padding: 18px;
+    min-height: 96px;
+    position:relative;
+  }
+  .output-text{
+    font-size:17px; line-height:1.6; color: var(--violet-deep);
+    font-weight:500; min-height:44px; word-break: break-word;
+  }
+  .output-text.placeholder{ color:#B7AFDD; font-weight:400; }
+  .output-tools{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    margin-top: 10px;
+  }
+  .output-tools-right{ display:flex; align-items:center; gap:8px; }
+
+  .voice-select{
+    appearance:none; -webkit-appearance:none;
+    border: 1px solid rgba(123,92,250,0.22);
+    background: #fff;
+    color: var(--violet-deep);
+    font-family:'Sarabun', sans-serif;
+    font-size: 12.5px; font-weight:500;
+    padding: 7px 26px 7px 12px;
+    border-radius: 999px; cursor:pointer;
+    max-width: 150px;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235A2FE0' stroke-width='3'><path d='M6 9l6 6 6-6'/></svg>");
+    background-repeat:no-repeat; background-position: right 8px center; background-size:11px;
+  }
+  .voice-select:disabled{ opacity:.5; cursor:default; }
+
+  .voice-row{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    margin-bottom: 4px;
+  }
+  .voice-row label{ font-size:12px; color: var(--ink-soft); font-weight:600; }
+
+  .translate-btn{
+    border:none; cursor:pointer;
+    background: var(--grad); color:#fff;
+    font-family:'Prompt', sans-serif; font-weight:600; font-size:15px;
+    padding: 15px; border-radius: 999px;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    box-shadow: 0 14px 26px -12px rgba(90,47,224,0.55);
+    transition: transform .15s ease;
+  }
+  .translate-btn:active{ transform: scale(0.97); }
+  .translate-btn svg{ width:17px; height:17px; }
+  .translate-btn.loading{ opacity:.75; pointer-events:none; }
+
+  /* ---------- Voice panel ---------- */
+  .voice-stage{
+    flex:1; display:flex; flex-direction:column; align-items:center;
+    justify-content:center; gap:18px; padding: 10px 0 6px;
+    min-height: 300px;
+  }
+
+  .orb-wrap{
+    position:relative; width:220px; height:220px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .ring{
+    position:absolute; border-radius:50%;
+    border:1.5px solid rgba(123,92,250,0.28);
+    inset:0;
+    opacity:0;
+  }
+  .orb-wrap.listening .ring{ animation: ringPulse 1.8s ease-out infinite; }
+  .orb-wrap.listening .ring:nth-child(2){ animation-delay:.5s; }
+  .orb-wrap.listening .ring:nth-child(3){ animation-delay:1s; }
+  @keyframes ringPulse{
+    0%{ transform: scale(0.72); opacity:.65; }
+    100%{ transform: scale(1.28); opacity:0; }
+  }
+
+  .dot{ position:absolute; width:5px; height:5px; border-radius:50%; background: var(--magenta); opacity:.55; }
+  .dot1{ top:6%; left:20%; } .dot2{ top:14%; right:8%; background:var(--blue); }
+  .dot3{ bottom:10%; left:6%; background:var(--violet);} .dot4{ bottom:4%; right:22%; }
+  .orb-wrap.listening .dot, .orb-wrap.speaking .dot{ animation: dotFloat 2.4s ease-in-out infinite; }
+  @keyframes dotFloat{ 0%,100%{ transform: translateY(0); opacity:.45;} 50%{ transform: translateY(-6px); opacity:.9;} }
+
+  .orb{
+    width:150px; height:150px; border-radius:50%;
+    background:
+      radial-gradient(circle at 32% 28%, rgba(255,255,255,0.55), rgba(255,255,255,0) 40%),
+      repeating-radial-gradient(circle at 50% 50%, rgba(255,255,255,0.16) 0 1.5px, transparent 1.5px 5px),
+      var(--grad);
+    box-shadow: 0 0 0 10px rgba(123,92,250,0.08), 0 20px 45px -14px rgba(90,47,224,0.65);
+    position:relative; z-index:2;
+    transition: transform .35s ease, box-shadow .35s ease;
+  }
+  .orb-wrap.listening .orb{ animation: orbBreathe 1.4s ease-in-out infinite; }
+  .orb-wrap.speaking .orb{ animation: orbBreathe .7s ease-in-out infinite; filter: hue-rotate(-12deg); }
+  .orb-wrap.processing .orb{ animation: orbSpin 1.1s linear infinite; }
+  @keyframes orbBreathe{ 0%,100%{ transform:scale(1);} 50%{ transform:scale(1.07);} }
+  @keyframes orbSpin{ 0%{ filter: brightness(1);} 50%{ filter: brightness(1.25);} 100%{ filter: brightness(1);} }
+
+  .mic-btn{
+    width:64px; height:64px; border-radius:50%; border:none; cursor:pointer;
+    background:#fff; color: var(--violet-deep);
+    box-shadow: 0 12px 30px -12px rgba(90,47,224,0.5), 0 0 0 6px #fff;
+    display:flex; align-items:center; justify-content:center;
+    transition: all .2s ease;
+    position:relative; z-index:3; margin-top:-38px;
+  }
+  .mic-btn svg{ width:24px; height:24px; }
+  .mic-btn.active{ background: var(--grad); color:#fff; }
+
+  .voice-status{ font-size:13.5px; color: var(--ink-soft); font-weight:500; min-height:18px; text-align:center; }
+
+  .transcript{
+    width:100%; max-height: 240px; overflow-y:auto;
+    display:flex; flex-direction:column; gap:10px;
+    padding-top: 6px;
+  }
+  .bubble{ max-width:88%; padding:12px 14px; border-radius: 18px; font-size:14.5px; line-height:1.5; }
+  .bubble.src{ align-self:flex-start; background:#F2EFFA; color:var(--ink); border-bottom-left-radius:6px; }
+  .bubble.tgt{ align-self:flex-end; background: var(--grad); color:#fff; border-bottom-right-radius:6px; }
+  .bubble .tag{ display:block; font-size:10.5px; opacity:.65; margin-bottom:3px; font-weight:600; letter-spacing:.3px; }
+
+  .empty-hint{ text-align:center; color:#B7AFDD; font-size:13px; padding: 6px 20px; }
+
+  footer{ text-align:center; font-size:11px; color:#C7C1E1; margin-top:18px; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.001ms !important; animation-iteration-count:1 !important; transition-duration: 0.001ms !important; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <div class="logo"></div>
+    <div>
+      <div class="title">Orbi</div>
+      <div class="subtitle">แปลภาษาไทย ⇄ อังกฤษ และอื่นๆ แบบทันที</div>
+    </div>
+  </div>
+
+  <div class="langbar">
+    <div class="lang-select-wrap">
+      <select id="srcLang" class="lang-select"></select>
+    </div>
+    <button class="swap-btn" id="swapBtn" aria-label="สลับภาษา" title="สลับภาษา">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10L3 6l4-4"/><path d="M3 6h13a4 4 0 0 1 4 4v1"/><path d="M17 14l4 4-4 4"/><path d="M21 18H8a4 4 0 0 1-4-4v-1"/></svg>
+    </button>
+    <div class="lang-select-wrap">
+      <select id="tgtLang" class="lang-select"></select>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="text">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h7"/></svg>
+      พิมพ์ข้อความ
+    </button>
+    <button class="tab" data-tab="voice">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4"/></svg>
+      สนทนาด้วยเสียง
+    </button>
+  </div>
+
+  <!-- TEXT PANEL -->
+  <div class="panel active" id="panel-text">
+    <div class="card">
+      <div class="field-label"><span id="srcLangLabel">English</span><span></span></div>
+      <textarea id="inputText" placeholder="พิมพ์หรือพูดข้อความที่นี่..."></textarea>
+      <div class="input-tools">
+        <span class="char-count"><span id="charCount">0</span>/2000</span>
+        <div class="tool-group">
+          <button class="icon-btn" id="clearBtn" title="ล้างข้อความ" aria-label="ล้างข้อความ">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+          <button class="icon-btn mic" id="micTextBtn" title="พูดเพื่อพิมพ์" aria-label="พูดเพื่อพิมพ์">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider-arrow">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    </div>
+
+    <div class="output-card">
+      <div class="field-label"><span id="tgtLangLabel">Thai</span><span></span></div>
+      <div class="output-text placeholder" id="outputText">คำแปลจะแสดงที่นี่</div>
+      <div class="output-tools">
+        <select class="voice-select" id="voiceSelectText" title="เลือกเสียงพูด"></select>
+        <div class="output-tools-right">
+          <button class="icon-btn" id="copyBtn" title="คัดลอก" aria-label="คัดลอก">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+          <button class="icon-btn" id="speakOutBtn" title="ฟังเสียง" aria-label="ฟังเสียง">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <button class="translate-btn" id="translateBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14M8 5v3M8 19l3-8 3 8M9.5 16h3"/></svg>
+      แปลข้อความ
+    </button>
+  </div>
+
+  <!-- VOICE PANEL -->
+  <div class="panel" id="panel-voice">
+    <div class="voice-row">
+      <label for="voiceSelectVoice">เสียงพูด AI</label>
+      <select class="voice-select" id="voiceSelectVoice" title="เลือกเสียงพูด"></select>
+    </div>
+    <div class="voice-stage">
+      <div class="orb-wrap" id="orbWrap">
+        <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+        <span class="dot dot1"></span><span class="dot dot2"></span><span class="dot dot3"></span><span class="dot dot4"></span>
+        <div class="orb"></div>
+        <button class="mic-btn" id="micVoiceBtn" aria-label="กดเพื่อพูด">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4"/></svg>
+        </button>
+      </div>
+      <div class="voice-status" id="voiceStatus">แตะไมค์เพื่อเริ่มพูด</div>
+    </div>
+
+    <div class="transcript" id="transcript">
+      <div class="empty-hint">บทสนทนาที่แปลแล้วจะแสดงที่นี่</div>
+    </div>
+  </div>
+
+  <footer>ใช้ Web Speech API ของเบราว์เซอร์ · แนะนำให้ใช้ Chrome เพื่อผลลัพธ์ดีที่สุด</footer>
+</div>
+
+<script>
+(function(){
+  // ---------- Languages ----------
+  const LANGS = [
+    { code:'en', name:'English', speech:'en-US' },
+    { code:'th', name:'ไทย (Thai)', speech:'th-TH' },
+    { code:'zh-CN', name:'จีน (Chinese)', speech:'zh-CN' },
+    { code:'vi', name:'เวียดนาม (Vietnamese)', speech:'vi-VN' },
+    { code:'ru', name:'รัสเซีย (Russian)', speech:'ru-RU' },
+    { code:'ja', name:'ญี่ปุ่น (Japanese)', speech:'ja-JP' },
+    { code:'ko', name:'เกาหลี (Korean)', speech:'ko-KR' },
+    { code:'fr', name:'ฝรั่งเศส (French)', speech:'fr-FR' },
+    { code:'es', name:'สเปน (Spanish)', speech:'es-ES' },
+    { code:'de', name:'เยอรมัน (German)', speech:'de-DE' },
+  ];
+  const byCode = c => LANGS.find(l => l.code === c);
+
+  const srcSel = document.getElementById('srcLang');
+  const tgtSel = document.getElementById('tgtLang');
+  LANGS.forEach(l => {
+    srcSel.appendChild(new Option(l.name, l.code));
+    tgtSel.appendChild(new Option(l.name, l.code));
+  });
+  srcSel.value = 'en';
+  tgtSel.value = 'th';
+
+  const srcLabel = document.getElementById('srcLangLabel');
+  const tgtLabel = document.getElementById('tgtLangLabel');
+  function syncLabels(){
+    srcLabel.textContent = byCode(srcSel.value).name;
+    tgtLabel.textContent = byCode(tgtSel.value).name;
+  }
+  syncLabels();
+  srcSel.addEventListener('change', syncLabels);
+  tgtSel.addEventListener('change', syncLabels);
+
+  document.getElementById('swapBtn').addEventListener('click', () => {
+    const a = srcSel.value, b = tgtSel.value;
+    srcSel.value = b; tgtSel.value = a;
+    syncLabels();
+    const inTxt = document.getElementById('inputText');
+    const outTxt = document.getElementById('outputText');
+    if(!outTxt.classList.contains('placeholder')){
+      inTxt.value = outTxt.textContent;
+    }
+    doTranslateText();
+  });
+
+  // ---------- Tabs ----------
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ---------- Translation (free, no key) ----------
+  async function translateText(text, from, to){
+    if(!text || !text.trim()) return '';
+    const fromCode = from === 'zh-CN' ? 'zh-CN' : from;
+    try {
+      const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${fromCode}&tl=${to}&dt=t&q=${encodeURIComponent(text)}`;
+      const res = await fetch(url);
+      if(!res.ok) throw new Error('primary failed');
+      const data = await res.json();
+      return data[0].map(chunk => chunk[0]).join('');
+    } catch(e){
+      // fallback: MyMemory
+      try{
+        const pair = `${fromCode}|${to}`;
+        const url2 = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${pair}`;
+        const res2 = await fetch(url2);
+        const data2 = await res2.json();
+        return data2.responseData.translatedText;
+      } catch(e2){
+        throw new Error('translate_failed');
+      }
+    }
+  }
+
+  // ---------- Text panel logic ----------
+  const inputText = document.getElementById('inputText');
+  const outputText = document.getElementById('outputText');
+  const charCount = document.getElementById('charCount');
+  const translateBtn = document.getElementById('translateBtn');
+  let debounceTimer = null;
+
+  inputText.addEventListener('input', () => {
+    charCount.textContent = inputText.value.length;
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(doTranslateText, 700);
+  });
+
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    inputText.value = '';
+    charCount.textContent = 0;
+    outputText.textContent = 'คำแปลจะแสดงที่นี่';
+    outputText.classList.add('placeholder');
+    inputText.focus();
+  });
+
+  async function doTranslateText(){
+    const text = inputText.value.trim();
+    if(!text){
+      outputText.textContent = 'คำแปลจะแสดงที่นี่';
+      outputText.classList.add('placeholder');
+      return;
+    }
+    translateBtn.classList.add('loading');
+    try{
+      const result = await translateText(text, srcSel.value, tgtSel.value);
+      outputText.textContent = result || '—';
+      outputText.classList.remove('placeholder');
+    } catch(e){
+      outputText.textContent = 'แปลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
+      outputText.classList.remove('placeholder');
+    } finally {
+      translateBtn.classList.remove('loading');
+    }
+  }
+  translateBtn.addEventListener('click', doTranslateText);
+
+  document.getElementById('copyBtn').addEventListener('click', () => {
+    if(outputText.classList.contains('placeholder')) return;
+    navigator.clipboard.writeText(outputText.textContent).catch(()=>{});
+    const btn = document.getElementById('copyBtn');
+    const original = btn.innerHTML;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>';
+    setTimeout(()=> btn.innerHTML = original, 1200);
+  });
+
+  // ---------- Text-to-speech with selectable voice ----------
+  let allVoices = [];
+  const voiceSelectText = document.getElementById('voiceSelectText');
+  const voiceSelectVoice = document.getElementById('voiceSelectVoice');
+
+  function guessGender(name){
+    const n = name.toLowerCase();
+    const femaleHints = ['female','women','หญิง','kanya','premwadee','narisa','zira','samantha','ava','serena','xiaoxiao','ting-ting','mei-jia','yuna','sora','salli','joanna','ivy'];
+    const maleHints = ['male','men','ชาย','pattara','kangkang','george','david','paul','daniel','alex','mark','yunjian','takumi','joey'];
+    if(femaleHints.some(h => n.includes(h))) return 'หญิง';
+    if(maleHints.some(h => n.includes(h))) return 'ชาย';
+    return '';
+  }
+
+  function refreshVoiceList(){
+    allVoices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+    populateVoiceSelect(voiceSelectText, tgtSel.value);
+    populateVoiceSelect(voiceSelectVoice, tgtSel.value);
+  }
+
+  function populateVoiceSelect(selectEl, langCode){
+    const prefix = langCode.split('-')[0];
+    const matches = allVoices.filter(v => v.lang && v.lang.toLowerCase().startsWith(prefix.toLowerCase()));
+    const prevValue = selectEl.value;
+    selectEl.innerHTML = '';
+    if(matches.length === 0){
+      const opt = new Option('เสียงระบบเริ่มต้น', '');
+      selectEl.appendChild(opt);
+      selectEl.disabled = true;
+      return;
+    }
+    selectEl.disabled = false;
+    matches.forEach((v, i) => {
+      const gender = guessGender(v.name);
+      const label = gender ? `${gender} · ${v.name}` : `เสียงที่ ${i+1} · ${v.name}`;
+      const opt = new Option(label, v.voiceURI);
+      selectEl.appendChild(opt);
+    });
+    // try to restore previous selection, else default to first
+    if(matches.some(v => v.voiceURI === prevValue)){
+      selectEl.value = prevValue;
+    } else {
+      selectEl.selectedIndex = 0;
+    }
+  }
+
+  function getSelectedVoice(selectEl){
+    return allVoices.find(v => v.voiceURI === selectEl.value) || null;
+  }
+
+  if('speechSynthesis' in window){
+    window.speechSynthesis.onvoiceschanged = refreshVoiceList;
+    // some browsers populate synchronously; try immediately + after a short delay
+    refreshVoiceList();
+    setTimeout(refreshVoiceList, 300);
+  }
+
+  tgtSel.addEventListener('change', refreshVoiceList);
+
+  // Keep a persistent reference outside the function scope — Chrome can silently
+  // garbage-collect the utterance mid-speech if nothing else references it,
+  // which causes speech to randomly cut out or never start.
+  let _activeUtterance = null;
+  let _speakWatchdog = null;
+
+  function speak(text, langCode, voiceURI, onEnd, _isRetry){
+    if(!text || !('speechSynthesis' in window)) { if(onEnd) onEnd(); return; }
+    const synth = window.speechSynthesis;
+
+    const runSpeak = () => {
+      if(synth.paused) synth.resume(); // Chrome sometimes leaves the engine "paused" after an interruption
+
+      // Resolve the voice fresh at speak-time instead of reusing an old cached
+      // object — a stale voice reference is a common reason Chrome stays silent.
+      const freshVoices = synth.getVoices();
+      const voice = voiceURI ? freshVoices.find(v => v.voiceURI === voiceURI) : null;
+
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = langCode;
+      if(voice) utter.voice = voice;
+      utter.rate = 1;
+      utter.pitch = 1;
+
+      let done = false;
+      const finish = () => {
+        if(done) return;
+        done = true;
+        clearTimeout(_speakWatchdog);
+        if(_activeUtterance === utter) _activeUtterance = null;
+        if(onEnd) onEnd();
+      };
+      utter.onend = finish;
+      utter.onerror = finish;
+
+      _activeUtterance = utter; // keep it alive until it finishes
+
+      // Watchdog: if the engine never actually starts speaking within a
+      // reasonable window, it silently dropped the utterance — retry once.
+      const estMs = Math.max(2200, Math.min(text.length * 130, 12000));
+      clearTimeout(_speakWatchdog);
+      _speakWatchdog = setTimeout(() => {
+        if(done) return;
+        if(!synth.speaking && !_isRetry){
+          done = true;
+          speak(text, langCode, voiceURI, onEnd, true);
+        }
+      }, estMs);
+
+      synth.speak(utter);
+    };
+
+    if(synth.speaking || synth.pending){
+      synth.cancel();
+      setTimeout(runSpeak, 80); // give Chrome a beat to actually clear the queue
+    } else {
+      runSpeak();
+    }
+  }
+
+  document.getElementById('speakOutBtn').addEventListener('click', () => {
+    if(outputText.classList.contains('placeholder')) return;
+    speak(outputText.textContent, byCode(tgtSel.value).speech, voiceSelectText.value);
+  });
+
+  // ---------- Speech recognition (shared) ----------
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  // iOS Safari/Chrome's speech engine can occasionally hang after the mic
+  // permission prompt and never fire onresult/onerror/onend again, which
+  // would leave a button stuck in "listening" forever. Every recognizer
+  // created here gets a watchdog timer so the UI always recovers on its own,
+  // and toggling the button off always force-resets the UI immediately
+  // instead of waiting on the browser's (possibly broken) callbacks.
+  function createRecognizer(langSpeech, onResult, onReset, timeoutMs){
+    if(!SR) return null;
+    const rec = new SR();
+    rec.lang = langSpeech;
+    rec.interimResults = false;
+    rec.maxAlternatives = 1;
+
+    let settled = false;
+    let watchdog = null;
+
+    const finish = (message) => {
+      if(settled) return;
+      settled = true;
+      clearTimeout(watchdog);
+      onReset(message);
+    };
+
+    rec.onresult = (e) => {
+      if(settled) return;
+      settled = true;
+      clearTimeout(watchdog);
+      const text = e.results[0][0].transcript;
+      onResult(text);
+    };
+    rec.onerror = (e) => {
+      const msg = e && e.error === 'not-allowed'
+        ? 'กรุณาอนุญาตให้เว็บนี้ใช้ไมโครโฟน แล้วลองใหม่อีกครั้ง'
+        : 'ไม่ได้ยินเสียง ลองใหม่อีกครั้ง';
+      finish(msg);
+    };
+    rec.onend = () => finish();
+
+    watchdog = setTimeout(() => {
+      try{ rec.abort(); }catch(err){}
+      finish('ไม่ได้ยินเสียง ลองใหม่อีกครั้ง');
+    }, timeoutMs || 9000);
+
+    rec._clearWatchdog = () => clearTimeout(watchdog);
+    return rec;
+  }
+
+  function safeStart(rec){
+    try{ rec.start(); return true; }
+    catch(e){ return false; }
+  }
+
+  function safeStop(rec){
+    if(!rec) return;
+    try{ rec.abort(); } // abort is more reliable than stop() at actually cutting the session on iOS
+    catch(e){}
+  }
+
+  // Mic inside text panel: fills the input box
+  const micTextBtn = document.getElementById('micTextBtn');
+  let textRec = null, textRecActive = false;
+
+  function resetTextMic(){
+    textRecActive = false;
+    micTextBtn.classList.remove('recording');
+  }
+
+  micTextBtn.addEventListener('click', () => {
+    if(!SR){ alert('เบราว์เซอร์นี้ไม่รองรับการพูดผ่านไมค์ กรุณาใช้ Chrome หรือ Safari เวอร์ชันล่าสุด'); return; }
+    if(textRecActive){ safeStop(textRec); resetTextMic(); return; }
+
+    textRec = createRecognizer(byCode(srcSel.value).speech, (text) => {
+      inputText.value = text;
+      charCount.textContent = text.length;
+      resetTextMic();
+      doTranslateText();
+    }, () => {
+      resetTextMic();
+    });
+
+    if(!textRec || !safeStart(textRec)){
+      alert('ไม่สามารถเปิดไมโครโฟนได้ ลองใหม่อีกครั้ง');
+      resetTextMic();
+      return;
+    }
+    textRecActive = true;
+    micTextBtn.classList.add('recording');
+  });
+
+  // ---------- Voice conversation panel ----------
+  const orbWrap = document.getElementById('orbWrap');
+  const micVoiceBtn = document.getElementById('micVoiceBtn');
+  const voiceStatus = document.getElementById('voiceStatus');
+  const transcript = document.getElementById('transcript');
+  let voiceRec = null, voiceActive = false;
+
+  function setOrbState(state){
+    orbWrap.classList.remove('listening','processing','speaking');
+    if(state) orbWrap.classList.add(state);
+  }
+
+  function addBubble(text, type, tag){
+    const empty = transcript.querySelector('.empty-hint');
+    if(empty) empty.remove();
+    const div = document.createElement('div');
+    div.className = 'bubble ' + type;
+    div.innerHTML = `<span class="tag">${tag}</span>${text}`;
+    transcript.appendChild(div);
+    transcript.scrollTop = transcript.scrollHeight;
+  }
+
+  function resetVoiceMic(message){
+    voiceActive = false;
+    micVoiceBtn.classList.remove('active');
+    setOrbState(null);
+    voiceStatus.textContent = message || 'แตะไมค์เพื่อเริ่มพูด';
+  }
+
+  micVoiceBtn.addEventListener('click', () => {
+    if(!SR){ alert('เบราว์เซอร์นี้ไม่รองรับการพูดผ่านไมค์ กรุณาใช้ Chrome หรือ Safari เวอร์ชันล่าสุด'); return; }
+    if(voiceActive){ safeStop(voiceRec); resetVoiceMic(); return; }
+
+    voiceRec = createRecognizer(byCode(srcSel.value).speech, async (text) => {
+      setOrbState('processing');
+      voiceStatus.textContent = 'กำลังแปล...';
+      addBubble(text, 'src', byCode(srcSel.value).name);
+      try{
+        const result = await translateText(text, srcSel.value, tgtSel.value);
+        addBubble(result, 'tgt', byCode(tgtSel.value).name);
+        setOrbState('speaking');
+        voiceStatus.textContent = 'กำลังพูด...';
+        speak(result, byCode(tgtSel.value).speech, voiceSelectVoice.value, () => {
+          setOrbState(null);
+          voiceStatus.textContent = 'แตะไมค์เพื่อเริ่มพูด';
+        });
+      } catch(e){
+        setOrbState(null);
+        voiceStatus.textContent = 'แปลไม่สำเร็จ ลองใหม่อีกครั้ง';
+      }
+      voiceActive = false;
+      micVoiceBtn.classList.remove('active');
+    }, (message) => {
+      resetVoiceMic(message);
+    });
+
+    if(!voiceRec || !safeStart(voiceRec)){
+      resetVoiceMic('ไม่สามารถเปิดไมโครโฟนได้ ลองใหม่อีกครั้ง');
+      return;
+    }
+    voiceActive = true;
+    micVoiceBtn.classList.add('active');
+    setOrbState('listening');
+    voiceStatus.textContent = 'กำลังฟัง...';
+  });
+
+})();
+</script>
+</body>
+</html>
